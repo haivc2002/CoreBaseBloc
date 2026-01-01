@@ -151,7 +151,7 @@ class AppColor {
   const AppColor._({
     Color? rawColor,
     String? themeKey,
-  })  : _rawColor = rawColor,
+  }) : _rawColor = rawColor,
         _themeKey = themeKey;
 
   /// 1️⃣ Màu cố định – không phụ thuộc theme
