@@ -35,7 +35,6 @@ abstract class BaseXController<B extends Bloc> with BaseContext<B>,
   void onInit() {
     _isLoadMore = false;
     isMoreEnable = true;
-    withScrollController = false;
     if (withScrollController) {
       scrollController = ScrollController();
       scrollController.addListener(_scrollListener);
