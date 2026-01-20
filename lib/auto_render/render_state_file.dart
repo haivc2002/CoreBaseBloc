@@ -310,8 +310,7 @@ class FieldParseResult {
 }
 
 FieldParseResult _parseField(String line, int lineNumber) {
-  // Biểu thức: (final )?<Type> <name>;
-  final pattern = RegExp(r'^(final\s+)?([\w\?<>\[\]]+)\s+([\w]+)\s*;');
+  final pattern = RegExp(r'^(final\s+)?(.+?)\s+(\w+)\s*;$');
   final match = pattern.firstMatch(line);
 
   if (match == null) {

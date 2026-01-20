@@ -8,7 +8,7 @@ import 'package:core_base_bloc/core_config/core_base_app.dart';
 import 'package:get_it/get_it.dart';
 
 abstract class BaseView<T extends BaseXController, B extends Bloc<dynamic, S>, S>
-    extends StatefulWidget with BaseContext<B>, BaseUtilities {
+    extends StatefulWidget with BaseContext<B> {
   BaseView({super.key});
 
   Widget zBuildView();
@@ -52,9 +52,7 @@ class _BaseViewState<T extends BaseXController, B extends Bloc<dynamic, S>, S>
     BaseView._state.remove(widget);
     BaseContext.stackType.remove(type);
     final stillExist = BaseContext.stackType.contains(type);
-    if (!stillExist) {
-      BaseContext.contextKV.remove(type);
-    }
+    if (!stillExist) BaseContext.contextKV.remove(type);
     super.dispose();
   }
 
@@ -62,7 +60,7 @@ class _BaseViewState<T extends BaseXController, B extends Bloc<dynamic, S>, S>
   void didChangeDependencies() {
     super.didChangeDependencies();
     routeObserver.subscribe(this, ModalRoute.of(context)! as PageRoute);
-    _controller.onGetArgument();
+    _controller.onChangeDependencies();
   }
 
   @override
@@ -83,28 +81,25 @@ class _BaseViewState<T extends BaseXController, B extends Bloc<dynamic, S>, S>
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: Colors.white,
-      child: BlocBuilder<B, S>(
-        builder: (context, state) {
-          BaseView._state[widget] = state;
+    return BlocBuilder<B, S>(
+      builder: (context, state) {
+        BaseView._state[widget] = state;
 
-          return ValueListenableBuilder<ScreenStateEnum>(
-            valueListenable: _controller.stateNotifier,
-            builder: (context, value, child) {
-              if(Platform.isAndroid) {
-                return SafeArea(
-                    top: false,
-                    bottom: false,
-                    child: widget.zBuildView()
-                );
-              } else {
-                return widget.zBuildView();
-              }
-            },
-          );
-        },
-      ),
+        return ValueListenableBuilder<ScreenStateEnum>(
+          valueListenable: _controller.stateNotifier,
+          builder: (context, value, child) {
+            if(Platform.isAndroid) {
+              return SafeArea(
+                  top: false,
+                  bottom: false,
+                  child: widget.zBuildView()
+              );
+            } else {
+              return widget.zBuildView();
+            }
+          },
+        );
+      },
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:core_base_bloc/core_base_bloc.dart';
 
+/// Exception Multiple API
 class ECMapi {
   final Widget errorWidget;
   final bool isError;

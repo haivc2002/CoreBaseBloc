@@ -18,6 +18,7 @@ dependencies:
   shared_preferences: ^2.5.3
   get_it: ^9.0.5
   flutter_bloc: ^9.1.1
+  custom_refresh_indicator: ^4.0.1
   intl: ^0.20.2
 
 dev_dependencies:

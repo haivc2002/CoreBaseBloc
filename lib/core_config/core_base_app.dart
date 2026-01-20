@@ -1,35 +1,36 @@
 import 'package:core_base_bloc/core_base_bloc.dart';
-import 'package:core_base_bloc/core_config/core_base_cubit.dart';
+import 'package:core_base_bloc/core_config/core_base_config_cubit.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
-class CoreBaseApp extends StatelessWidget {
+class CoreBaseApp<L> extends StatelessWidget {
   final String initialRoute;
   final ThemeData? theme;
   final Route<dynamic>? Function(RouteSettings) onGenerateRoute;
-  final CoreBaseWidget? initWidget;
+  final ConfigTextStyle? configTextStyle;
   final Map<String, Map<String, Color>>? initTheme;
   final LocalizationsDelegate<dynamic>? appLocalizations;
 
-  const CoreBaseApp({super.key,
+  CoreBaseApp({super.key,
     required this.initialRoute,
     required this.onGenerateRoute,
     this.theme,
-    this.initWidget,
+    this.configTextStyle,
     this.appLocalizations,
     this.initTheme,
-  });
+  }) {
+    CoreBaseConfigState.configTextStyle = configTextStyle ?? ConfigTextStyle();
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => CoreBaseCubit()
-        ..setUpCoreWidgetInit(initWidget)
+      create: (_) => CoreBaseConfigCubit()
         ..setUpColorTheme(initTheme),
-      child: BlocBuilder<CoreBaseCubit, CoreBaseConfig>(
+      child: BlocBuilder<CoreBaseConfigCubit, CoreBaseConfigState>(
         builder: (context, state) {
           return MaterialApp(
             navigatorKey: navigatorKey,
@@ -37,7 +38,6 @@ class CoreBaseApp extends StatelessWidget {
             navigatorObservers: [routeObserver],
             title: 'Flutter Demo',
             onGenerateRoute: onGenerateRoute,
-            // locale: const Locale('vi', 'VN'),
             locale: state.locale,
             supportedLocales: const [
               Locale('vi', 'VN'),

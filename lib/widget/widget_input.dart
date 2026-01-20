@@ -1,6 +1,4 @@
-import 'package:core_base_bloc/base/base_context.dart';
 import 'package:core_base_bloc/core_base_bloc.dart';
-import 'package:core_base_bloc/core_config/core_base_cubit.dart';
 import 'package:flutter/services.dart';
 
 class WidgetInput extends StatelessWidget {
@@ -16,11 +14,12 @@ class WidgetInput extends StatelessWidget {
     this.hintTextAnimation = true,
     this.autoSelectAll = false,
     this.contentPadding, this.onSubmitted,
-    this.fillColor, this.radius, this.enabledBorderColor,
-    this.focusedBorderColor, this.textStyle
+    this.fillColor = Colors.white, this.radius = 10, this.enabledBorderColor = Colors.transparent,
+    this.alertColor = Colors.red,
+    this.focusedBorderColor = Colors.grey, this.textStyle, this.cursorColor = Colors.blue
   }) : assert(
   autoSelectAll == false || controller != null,
-  'Để sử dụng autoSelectAll = true thì phải truyền controller!',
+  'To use autoSelectAll = true, you must pass the controller!',
   );
 
   final List<TextInputFormatter>? inputFormatters;
@@ -39,24 +38,15 @@ class WidgetInput extends StatelessWidget {
   final bool hintTextAnimation, autoSelectAll;
   final EdgeInsetsGeometry? contentPadding;
   final Function(String)? onSubmitted;
-  final double? radius;
-  final Color? fillColor, enabledBorderColor, focusedBorderColor;
+  final double radius;
+  final Color fillColor,
+      enabledBorderColor,
+      focusedBorderColor,
+      alertColor,
+      cursorColor;
 
   @override
   Widget build(BuildContext context) {
-    final sys = context.watch<CoreBaseCubit>().state.initBaseWidget?.configInput ?? ConfigInput();
-    final resultRadius = radius ?? sys.radius;
-    final resultFillColor = fillColor ?? sys.fillColor.resolve(context);
-    final resultFocusedBorderColor = focusedBorderColor ?? sys.focusBorderColor.resolve(context);
-    final resultEnabledBorderColor = enabledBorderColor ?? sys.enableBorderColor.resolve(context);
-    final styleDef = context.watch<CoreBaseCubit>().state.initBaseWidget?.configTextStyle;
-    final resultStyle = textStyle ?? TextStyle(
-      fontSize: styleDef?.fontSize,
-      color: styleDef?.color?.resolve(context),
-      fontFamily: styleDef?.fontFamily,
-      fontWeight: styleDef?.fontWeight
-    );
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,9 +61,9 @@ class WidgetInput extends StatelessWidget {
         ]),
         TextField(
           textAlign: textAlign,
-          cursorColor: sys.cursorColor.resolve(context),
+          cursorColor: cursorColor,
           enabled: enabled,
-          style: resultStyle,
+          style: textStyle ?? textStyleWithCtx(context).sColor(Colors.black),
           inputFormatters: inputFormatters,
           focusNode: focusNode,
           keyboardType: keyboardType ?? TextInputType.text,
@@ -94,25 +84,23 @@ class WidgetInput extends StatelessWidget {
           decoration: InputDecoration(
             counterText: '',
             filled: true,
-            fillColor: resultFillColor,
+            fillColor: fillColor,
             contentPadding: contentPadding ?? const EdgeInsets.fromLTRB(20, 15, 20, 19),
             suffixIcon: suffixIcon != null ? IntrinsicWidth(
               child: Padding(
                 padding: const EdgeInsets.only(left: 8, right: 10),
                 child: IconButton(
                   onPressed: suffixIcon!.onPressed,
-                  icon: suffixIcon!.icon is Icon
-                      ? suffixIcon!.icon as Icon
-                      : WidgetIcon(icon: suffixIcon!.icon),
+                  icon: WidgetIcon(icon: suffixIcon!.icon, colors: [?suffixIcon!.color],),
                 ),
               ),
             ) : null,
-            hintStyle: hintStyle ?? textStyleWithCtx(context).sColor(sys.hintColor.resolve(context)).regular,
+            hintStyle: hintStyle ?? textStyleWithCtx(context).sColor(Colors.grey).regular,
             hintText: !hintTextAnimation ? hintText ?? '' : null,
             label: hintTextAnimation ? Text(hintText ?? "",
                 style: hintStyle ?? textStyleWithCtx(context).sColor((validateValue??'').isNotEmpty
-                    ? sys.alertColor.resolve(context)
-                    : sys.hintColor.resolve(context)
+                    ? alertColor
+                    : hintStyle?.color ?? Colors.grey
                 ).regular
             ) : null,
             border: InputBorder.none,
@@ -125,12 +113,15 @@ class WidgetInput extends StatelessWidget {
               minHeight: 0,
             ),
             enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: (validateValue??'').isNotEmpty ? sys.alertColor.resolve(context) : resultEnabledBorderColor),
-                borderRadius: BorderRadius.circular(resultRadius)
+                borderSide: BorderSide(color: (validateValue??'').isNotEmpty
+                    ? alertColor
+                    : enabledBorderColor
+                ),
+                borderRadius: BorderRadius.circular(radius)
             ),
             focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: (validateValue??'').isNotEmpty ? sys.alertColor.resolve(context) : resultFocusedBorderColor),
-                borderRadius: BorderRadius.circular(resultRadius)
+                borderSide: BorderSide(color: (validateValue??'').isNotEmpty ? alertColor : focusedBorderColor),
+                borderRadius: BorderRadius.circular(radius)
             ),
           ),
         ),
@@ -150,8 +141,13 @@ class WidgetInput extends StatelessWidget {
 class SuffixIcon {
   final Function()? onPressed;
   final Object icon;
+  final Color? color;
   SuffixIcon({
     this.onPressed,
-    required this.icon
-  });
+    required this.icon,
+    this.color
+  }) : assert(
+  icon is IconData || icon is String,
+  'icon must be `IconData` or `String`',
+  );
 }

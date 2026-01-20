@@ -1,16 +1,13 @@
-import 'package:core_base_bloc/base/base_context.dart';
 import 'package:core_base_bloc/core_base_bloc.dart';
 import 'package:flutter/cupertino.dart';
 
-mixin class BaseUtilities {
-
+mixin BaseUtilities {
   ECWidget eCWidget(Object? errorCode, {Function()? onTap}) {
     if (errorCode.runtimeType != String && errorCode.runtimeType != int) {
       throw ArgumentError('errorCode must be String or type Result. -> "int"');
     }
     return ECWidget._(errorCode, onTap: onTap);
   }
-
 }
 
 class ECWidget extends StatelessWidget {
@@ -22,7 +19,7 @@ class ECWidget extends StatelessWidget {
   "Type only recognizes int or String",
   );
 
-  String _getDefaultMessage() {
+  String get _getDefaultMessage {
     if(_errorCode is String) return _errorCode;
     switch (_errorCode) {
       case Result.isHttp:
@@ -40,15 +37,15 @@ class ECWidget extends StatelessWidget {
     }
   }
 
-  Widget _buildErrorContent(String message, BuildContext context) {
+  Widget _buildErrorContent(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _getErrorIcon(),
+        _getErrorIcon,
         const SizedBox(height: 12),
         Text(
-          message,
-          style: textStyleWithCtx(context).sColor(Colors.black54).medium,
+          _getDefaultMessage,
+          style: textStyleWithCtx(context).medium,
           textAlign: TextAlign.center,
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
@@ -57,11 +54,15 @@ class ECWidget extends StatelessWidget {
     );
   }
 
-  Widget _getErrorIcon() {
+  Widget get _getErrorIcon {
     IconData iconData;
     switch (_errorCode) {
       case Result.isHttp:
+        iconData = Icons.nearby_error;
+        break;
       case Result.isTimeOut:
+        iconData = CupertinoIcons.timer;
+        break;
       case Result.isDueServer:
         iconData = CupertinoIcons.exclamationmark_circle;
         break;
@@ -74,40 +75,46 @@ class ECWidget extends StatelessWidget {
       default:
         iconData = CupertinoIcons.info;
     }
-    return Icon(iconData, size: 60, color: Colors.black54.withValues(alpha: 0.7));
+    return Builder(
+      builder: (context) {
+        return Icon(iconData, size: 60, color: textStyleWithCtx(context).color);
+      }
+    );
   }
 
   String get onlyMesStr {
-    String message = _getDefaultMessage();
+    String message = _getDefaultMessage;
     return message;
   }
 
-  Widget onlyMesWidget(BuildContext context) {
-    String message = _getDefaultMessage();
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          message,
-          style: textStyleWithCtx(context).sColor(Colors.black54).medium,
-          textAlign: TextAlign.center,
-          maxLines: 3,
-          overflow: TextOverflow.ellipsis,
-        ),
-        if(onTap != null) _reTryAction(context),
-      ],
+  Widget get onlyMesWidget {
+    return Builder(
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              _getDefaultMessage,
+              style: textStyleWithCtx(context).sColor(Colors.black54).medium,
+              textAlign: TextAlign.center,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if(onTap != null) _reTryAction(context),
+          ],
+        );
+      }
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    String message = _getDefaultMessage();
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        _buildErrorContent(message, context),
+        _buildErrorContent(context),
         if(onTap != null) _reTryAction(context),
       ],
     );
@@ -119,7 +126,6 @@ class ECWidget extends StatelessWidget {
       child: SizedBox(
         width: 120,
         child: WidgetButton(
-          vertical: 8,
           title: "Thử lại",
           contentStyle: textStyleWithCtx(context).sColor(Colors.white).medium,
           onTap: onTap,

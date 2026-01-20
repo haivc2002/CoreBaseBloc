@@ -79,7 +79,7 @@ mixin UseLocalizations<T> {
   /// Run the following command at the ROOT of the Flutter project:
   ///
   /// ```bash
-  /// flutter gen-l10n
+  /// 👉 flutter gen-l10n
   /// ```
   ///
   /// This command generates localization classes, for example:
@@ -102,7 +102,7 @@ mixin UseLocalizations<T> {
   /// Widget build(BuildContext context) {
   ///   return CoreBaseApp(
   ///     ...
-  ///     appLocalizations: AppLocalizations.delegate, // Register localization
+  ///     appLocalizations: AppLocalizations.delegate, // 👈 Register localization
   ///     ...
   ///   );
   /// }
@@ -112,17 +112,25 @@ mixin UseLocalizations<T> {
   /// localized resources at runtime.
   ///
   /// ---------------------------------------------------------------------------
-  /// 4. USING TXT FOR LOCALIZED STRINGS
+  /// 4. USING [l10n] FOR LOCALIZED STRINGS
   /// ---------------------------------------------------------------------------
   ///
   /// After configuration, localized strings can be accessed globally
-  /// using the `txt` helper.
+  /// using the `l10n` helper.
   ///
   /// Example:
   ///
-  /// ```dart
-  /// txt<AppLocalizations>().xinChao
-  /// ```
+  /// class ExampleView extends BaseView<ExampleXController, ExampleBloc, ExampleState>
+  ///     with UseLocalizations<AppLocalizations> {
+  ///     ...
+  /// @override
+  /// Widget zBuildView() {
+  ///    return Text(l10n.xinChao);
+  /// }
+  ///
+  /// Enable for controller
+  ///
+  /// class ExampleXController extends BaseXController<ExampleBloc> with UseLocalizations<AppLocalizations> {...}
   ///
   /// This returns the localized value for the current locale:
   /// - "Hello" for English (`en`)
@@ -141,7 +149,7 @@ mixin UseLocalizations<T> {
   /// - No `BuildContext` needs to be passed explicitly.
   ///
   /// ===========================================================================
-  /// END OF TXT LOCALIZATION GUIDE
+  /// END OF [l10n] LOCALIZATION GUIDE
   /// ===========================================================================
 
   T get l10n {

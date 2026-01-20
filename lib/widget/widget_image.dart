@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:core_base_bloc/core_base_bloc.dart';
-import 'package:core_base_bloc/core_config/core_base_cubit.dart';
+import 'package:core_base_bloc/core_config/core_base_config_cubit.dart';
 
 class WidgetImage extends StatelessWidget {
   final String? image;
@@ -10,7 +10,7 @@ class WidgetImage extends StatelessWidget {
   final Widget? errorImage;
   final Widget? loadingImage;
   final BoxFit? fit;
-  final double? radius;
+  final double radius;
   final Color? color;
 
   const WidgetImage({
@@ -21,23 +21,19 @@ class WidgetImage extends StatelessWidget {
     this.fit,
     this.loadingImage,
     this.errorImage,
-    this.radius,
+    this.radius = 0,
     this.color
   });
 
   @override
   Widget build(BuildContext context) {
-    final sys = context.watch<CoreBaseCubit>().state.initBaseWidget?.configImage ?? ConfigImage();
-    final resultRadius = radius ?? sys.radius;
-    final resultLoadingImage = loadingImage ?? sys.loadingImage;
-    final resultErrorImage = errorImage ?? sys.errorImage;
-    if (image == null || image!.isEmpty) return _errorWidget(resultErrorImage);
+    if (image == null || image!.isEmpty) return _errorWidget;
 
     final isNetwork = image!.startsWith("http");
     final isAssets = image!.endsWith(".png") || image!.endsWith(".jpg");
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(resultRadius),
+      borderRadius: BorderRadius.circular(radius),
       child: (){
         String? finalImage = image;
         if (isNetwork && finalImage != null && finalImage.startsWith('http://')) {
@@ -51,8 +47,10 @@ class WidgetImage extends StatelessWidget {
             width: width,
             color: color,
             fit: fit ?? BoxFit.cover,
-            progressIndicatorBuilder: (context, url, progress) => _loadImage(resultLoadingImage),
-            errorWidget: (context, url, error) => _errorWidget(resultErrorImage),
+            progressIndicatorBuilder: (context, url, progress) {
+              return loadingImage ?? Center(child: WidgetWait());
+            },
+            errorWidget: (context, url, error) => _errorWidget,
             fadeInDuration: Duration.zero,
             fadeOutDuration: Duration.zero,
             httpHeaders: {
@@ -67,7 +65,7 @@ class WidgetImage extends StatelessWidget {
             width: width,
             color: color,
             fit: fit ?? BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => _errorWidget(resultErrorImage),
+            errorBuilder: (context, error, stackTrace) => _errorWidget,
           );
         } else {
           return Image.file(
@@ -76,18 +74,14 @@ class WidgetImage extends StatelessWidget {
             width: width,
             color: color,
             fit: fit ?? BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => _errorWidget(resultErrorImage),
+            errorBuilder: (context, error, stackTrace) => _errorWidget,
           );
         }
       }(),
     );
   }
 
-  Widget _loadImage(Widget? loading) {
-    return loading ?? Center(child: WidgetWait());
-  }
-
-  Widget _errorWidget(Widget? error) {
-    return error ?? Icon(Icons.error);
+  Widget get _errorWidget {
+    return errorImage ?? Icon(Icons.error);
   }
 }

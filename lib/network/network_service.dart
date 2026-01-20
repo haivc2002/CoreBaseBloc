@@ -2,21 +2,21 @@ import 'dart:async';
 import 'dart:developer' as dev;
 
 import 'package:core_base_bloc/common/global.dart';
-import 'package:core_base_bloc/network/auth_interceptor.dart';
+import 'package:core_base_bloc/network/network_auth_interceptor.dart';
 import 'package:dio/dio.dart';
 
-import 'dev_logger.dart';
-import 'exception.dart';
+import 'network_dev_logger.dart';
+import 'network_exception.dart';
 
 String TOKEN_STRING = "TOKEN_STRING";
 String REFRESH_TOKEN_STRING = "REFRESH_TOKEN_STRING";
 
-class ServiceNetwork {
+class NetworkService {
   final Dio _dio;
   final String baseUrl;
-  ServiceNetwork({required this.baseUrl}) : _dio = Dio(BaseOptions(baseUrl: baseUrl)) {
+  NetworkService({required this.baseUrl}) : _dio = Dio(BaseOptions(baseUrl: baseUrl)) {
     _dio.interceptors.add(DevLogger());
-    _dio.interceptors.add(AuthInterceptor(_dio));
+    _dio.interceptors.add(NetworkAuthInterceptor(_dio));
     _dio.options.validateStatus = (status) => true;
   }
 
@@ -25,7 +25,7 @@ class ServiceNetwork {
   Future<Result<T>> _request<T>({
     String endpoint = "",
     required String method,
-    Map<String, dynamic>? data,
+    Object? data,
     Map<String, dynamic>? query,
     bool withToken = false,
     required T Function(dynamic) fromJson,
@@ -47,9 +47,9 @@ class ServiceNetwork {
     } on DioException catch (dioException) {
       if(dioException.type == DioExceptionType.connectionError) {
         return Failure<T>(Result.isNotConnect);
-        } else {
-          return Failure<T>(dioException.response?.statusCode ?? Result.isDueServer);
-        }
+      } else {
+        return Failure<T>(dioException.response?.statusCode ?? Result.isDueServer);
+      }
     } on TimeoutException {
       return Failure<T>(Result.isTimeOut);
     } catch (e, stackTrace) {
@@ -75,7 +75,7 @@ class ServiceNetwork {
 
   Future<Result<T>> post<T>({
     String endpoint = "",
-    Map<String, dynamic>? data,
+    Object? data,
     required T Function(dynamic) fromJson,
     bool withToken = false,
   }) {
@@ -90,7 +90,7 @@ class ServiceNetwork {
 
   Future<Result<T>> put<T>({
     String endpoint = "",
-    Map<String, dynamic>? data,
+    Object? data,
     required T Function(dynamic) fromJson,
     bool withToken = false,
   }) {
@@ -106,7 +106,7 @@ class ServiceNetwork {
   Future<Result<T>> delete<T>({
     String endpoint = "",
     Map<String, dynamic>? query,
-    Map<String, dynamic>? data,
+    Object? data,
     required T Function(dynamic) fromJson,
     bool withToken = false,
   }) {
