@@ -47,6 +47,8 @@ class WidgetInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final style = Theme.of(context).textTheme.labelMedium;
+    
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,16 +56,16 @@ class WidgetInput extends StatelessWidget {
         Row(children: [
           if(title != null && (title??'').isNotEmpty) Padding(
             padding: const EdgeInsets.symmetric(vertical: 5),
-            child: Text(title??'', style: textStyleWithCtx(context)),
+            child: Text(title??'', style: style),
           ),
           const SizedBox(width: 5),
-          if(tick!) Text("*", style: textStyleWithCtx(context).sColor(Colors.red).sSize(18))
+          if(tick!) Text("*", style: style?.sColor(Colors.red).sSize(18))
         ]),
         TextField(
           textAlign: textAlign,
           cursorColor: cursorColor,
           enabled: enabled,
-          style: textStyle ?? textStyleWithCtx(context).sColor(Colors.black),
+          style: textStyle ?? style?.sColor(Colors.black),
           inputFormatters: inputFormatters,
           focusNode: focusNode,
           keyboardType: keyboardType ?? TextInputType.text,
@@ -95,10 +97,10 @@ class WidgetInput extends StatelessWidget {
                 ),
               ),
             ) : null,
-            hintStyle: hintStyle ?? textStyleWithCtx(context).sColor(Colors.grey).regular,
+            hintStyle: hintStyle ?? style?.sColor(Colors.grey).regular,
             hintText: !hintTextAnimation ? hintText ?? '' : null,
             label: hintTextAnimation ? Text(hintText ?? "",
-                style: hintStyle ?? textStyleWithCtx(context).sColor((validateValue??'').isNotEmpty
+                style: hintStyle ?? style?.sColor((validateValue??'').isNotEmpty
                     ? alertColor
                     : hintStyle?.color ?? Colors.grey
                 ).regular
@@ -130,7 +132,7 @@ class WidgetInput extends StatelessWidget {
           curve: Curves.ease,
           child: (validateValue != null && (validateValue ?? '').isNotEmpty) ? Text(
             validateValue!,
-            style: textStyleWithCtx(context).sColor(Colors.red).medium.sSize(12),
+            style: style?.sColor(Colors.red).medium.sSize(12),
           ) : const SizedBox.shrink(),
         ),
       ],

@@ -1,6 +1,3 @@
-
-
-import 'package:core_base_bloc/base/base_context.dart';
 import 'package:core_base_bloc/core_base_bloc.dart';
 
 class WidgetCheckbox extends StatelessWidget {
@@ -32,7 +29,7 @@ class WidgetCheckbox extends StatelessWidget {
               activeColor: activeColor
             ),
             const SizedBox(width: 5),
-            if(title != null) Expanded(child: Text(title!, style: style ?? textStyleWithCtx(context)))
+            if(title != null) Expanded(child: Text(title!, style: style ?? Theme.of(context).textTheme.labelMedium))
           ],
         ),
       ),

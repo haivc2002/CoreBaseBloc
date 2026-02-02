@@ -9,7 +9,7 @@ class WidgetButton extends StatelessWidget {
     this.onTap,
     this.padding = const EdgeInsets.symmetric(vertical: 7, horizontal: 10),
     this.colors = const [Colors.black, Colors.black],
-    TextStyle? contentStyle,
+    this.contentStyle,
     this.borderColor,
     this.radius = 10,
     this.enableShadow = true,
@@ -18,20 +18,14 @@ class WidgetButton extends StatelessWidget {
   })  : assert(colors.isEmpty || colors.length <= 2, "The maximum number of 'colors' should not exceed 2."),
         assert(title is Widget? || title is String?, "The 'title' can only be a widget or a string."),
         assert(iconLeading is IconData? || title is String?, "The 'iconLeading' can only be a IconData or a string."),
-        assert(iconTrailing is IconData? || title is String?, "The 'iconTrailing' can only be a IconData or a string."),
-  contentStyle = contentStyle ?? TextStyle(
-      fontFamily: CoreBaseConfigState.configTextStyle.fontFamily,
-      fontSize: 13,
-      color: Colors.white,
-      fontWeight: FontWeight.bold
-      );
+        assert(iconTrailing is IconData? || title is String?, "The 'iconTrailing' can only be a IconData or a string.");
 
   final Object? title;
   final Color? borderColor;
   final List<Color> colors;
   final Function()? onTap;
   final double radius;
-  final TextStyle contentStyle;
+  final TextStyle? contentStyle;
   final EdgeInsets padding;
   final bool enableShadow;
   final Object? iconLeading;
@@ -39,6 +33,13 @@ class WidgetButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final resultStyle = contentStyle ?? TextStyle(
+        fontFamily: Theme.of(context).textTheme.labelMedium?.fontFamily,
+        fontSize: 13,
+        color: Colors.white,
+        fontWeight: FontWeight.bold
+    );
+
     return LayoutBuilder(builder: (context, constraints) {
       double width = constraints.maxWidth;
       return DecoratedBox(
@@ -77,15 +78,15 @@ class WidgetButton extends StatelessWidget {
                         padding: EdgeInsets.only(right: title == null ? 6 : 0),
                         child: WidgetIcon(
                           icon: iconLeading!,
-                          colors: [?contentStyle.color],
-                          size: contentStyle.fontSize! * 1.2,
+                          colors: [?resultStyle.color],
+                          size: resultStyle.fontSize! * 1.2,
                         ),
                       ),
                     ConstrainedBox(
                       constraints:
                       BoxConstraints(maxWidth: width - 24 - padding.horizontal),
                       child: title is String
-                        ? Text(title as String? ?? "", style: contentStyle)
+                        ? Text(title as String? ?? "", style: resultStyle)
                         : title as Widget? ?? const SizedBox(),
                     ),
                     if (iconTrailing != null)
@@ -93,8 +94,8 @@ class WidgetButton extends StatelessWidget {
                         padding: EdgeInsets.only(left: title != "" ? 6 : 0),
                         child: WidgetIcon(
                           icon: iconTrailing!,
-                          colors: [contentStyle.color ?? Colors.white],
-                          size: contentStyle.fontSize! * 1.2,
+                          colors: [resultStyle.color ?? Colors.white],
+                          size: resultStyle.fontSize! * 1.2,
                         ),
                       ),
                   ],

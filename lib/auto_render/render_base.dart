@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:convert';
 
 Map<String, String> loadEnvFile(String filePath) {
   final file = File(filePath);
@@ -17,10 +16,8 @@ Map<String, String> loadEnvFile(String filePath) {
     final value = line.substring(index + 1).trim();
     env[key] = value;
   }
-
   return env;
 }
-
 
 void main(List<String> args) async {
   if (args.isEmpty) {
@@ -29,35 +26,17 @@ void main(List<String> args) async {
   }
 
   final moduleName = args[0].toLowerCase();
-
   final env = loadEnvFile('.env');
 
-  final pathView = env['PATH_VIEW'];
-  final pathRouter = env['PATH_ROUTER'];
-  final pathDI = env['PATH_DI'];
-  final packageImport = env['PACKAGE_IMPORT'];
+  final pathView = env['PATH_VIEW']?.trim();
+  final pathRouter = env['PATH_ROUTER']?.trim();
+  final pathDI = env['PATH_DI']?.trim();
+  final packageImport = env['PACKAGE_IMPORT']?.trim();
 
-  if (pathView == null || pathView == "") throw Exception('pathView cannot be left blank');
-  if (pathRouter == null || pathRouter == "") throw Exception('pathRouter cannot be left blank');
-  if (pathDI == null || pathDI == "") throw Exception('pathDI cannot be left blank');
-  if (packageImport == null || packageImport == "") throw Exception('packageImport cannot be left blank');
-
-  // Load config.json
-  // final configFile = File('core_base_bloc/lib/auto_render/render_base.json');
-  // if (!await configFile.exists()) {
-  //   print('Không tìm thấy file render_base.json');
-  //   return;
-  // }
-  //
-  // final config = jsonDecode(await configFile.readAsString()) as Map<String, dynamic>;
-  // if (config['pathView'] == null || config['pathView'] == "") {
-  //   throw Exception('pathView trong render_base.json không được để trống');
-  // }
-  //
-  // final pathView = config['pathView'] as String;
-  // final pathRouter = config['pathRouter'] as String;
-  // final pathDI = config['pathDI'] as String;
-  // final packageImport = config['packageImport'] as String;
+  if (pathView == null || pathView.isEmpty) throw Exception('PATH_VIEW cannot be left blank');
+  if (pathRouter == null || pathRouter.isEmpty) throw Exception('PATH_ROUTER cannot be left blank');
+  if (pathDI == null || pathDI.isEmpty) throw Exception('PATH_DI cannot be left blank');
+  if (packageImport == null || packageImport.isEmpty) throw Exception('PACKAGE_IMPORT cannot be left blank');
 
   // Tạo root folder nếu chưa tồn tại
   final rootDir = Directory(pathView);
@@ -82,9 +61,11 @@ void main(List<String> args) async {
   final capModule = toPascalCase(moduleName);
 
   // ====================== 1. Tạo các file cơ bản ======================
-  final files = [
+  final filesToCreate = [
     // Bloc
-    _createFile('$folderPath/${moduleName}_bloc.dart', '''
+    _FileData(
+      path: '$folderPath/${moduleName}_bloc.dart',
+      content: '''
 import 'package:core_base_bloc/core_base_bloc.dart';
 part '${moduleName}_event.dart';
 part '${moduleName}_state.dart';
@@ -94,24 +75,30 @@ class ${capModule}Bloc extends Bloc<${capModule}Event, ${capModule}State> {
     // on<${capModule}Event>((event, emit) {});
   }
 }
-'''),
-
+''',
+    ),
     // Event
-    _createFile('$folderPath/${moduleName}_event.dart', '''
+    _FileData(
+      path: '$folderPath/${moduleName}_event.dart',
+      content: '''
 part of '${moduleName}_bloc.dart';
 
 class ${capModule}Event {}
-'''),
-
+''',
+    ),
     // State
-    _createFile('$folderPath/${moduleName}_state.dart', '''
+    _FileData(
+      path: '$folderPath/${moduleName}_state.dart',
+      content: '''
 part of '${moduleName}_bloc.dart';
 
 class ${capModule}State {}
-'''),
-
+''',
+    ),
     // View
-    _createFile('$folderPath/${moduleName}_view.dart', '''
+    _FileData(
+      path: '$folderPath/${moduleName}_view.dart',
+      content: '''
 import 'package:core_base_bloc/core_base_bloc.dart';
 import '${moduleName}_bloc.dart';
 import '${moduleName}_x_controller.dart';
@@ -129,27 +116,41 @@ class ${capModule}View extends BaseView<${capModule}XController, ${capModule}Blo
     );
   }
 }
-'''),
-
+''',
+    ),
     // XController
-    _createFile('$folderPath/${moduleName}_x_controller.dart', '''
+    _FileData(
+      path: '$folderPath/${moduleName}_x_controller.dart',
+      content: '''
 import 'package:core_base_bloc/core_base_bloc.dart';
 import '${moduleName}_bloc.dart';
 
 class ${capModule}XController extends BaseXController<${capModule}Bloc> {}
-'''),
+''',
+    ),
   ];
 
-  for (final f in files) {
+  for (final f in filesToCreate) {
+    final file = File(f.path);
+    file.writeAsStringSync(f.content.trim() + '\n');
     print('Tạo file: ${f.path}');
   }
 
   // ====================== 2. Cập nhật Router ======================
-  final routerFile = File(pathRouter);
-  String routerContent = '';
+  await _updateRouterFile(pathRouter, packageImport, moduleName, capModule);
 
-  if (!routerFile.existsSync() || await routerFile.length() == 0) {
-    routerContent = '''
+  // ====================== 3. Cập nhật DI ======================
+  await _updateDIFunction(pathDI, packageImport, capModule, moduleName);
+
+  print('Hoàn tất! Module "$moduleName" đã được tạo và tích hợp.');
+}
+
+Future<void> _updateRouterFile(String pathRouter, String packageImport, String moduleName, String capModule) async {
+  final routerFile = File(pathRouter);
+  String content = '';
+
+  if (!routerFile.existsSync() || (await routerFile.length()) == 0) {
+    content = '''
 import 'package:core_base_bloc/core_base_bloc.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -162,24 +163,21 @@ class AppRouter {
   }
 }
 ''';
-    routerFile.createSync(recursive: true);
   } else {
-    routerContent = routerFile.readAsStringSync();
+    content = await routerFile.readAsString();
   }
 
-  // Thêm import
   final importBloc = "import '$packageImport/view/$moduleName/${moduleName}_bloc.dart';";
   final importView = "import '$packageImport/view/$moduleName/${moduleName}_view.dart';";
 
-  if (!routerContent.contains(importBloc)) {
-    routerContent = '$importBloc\n$routerContent';
+  if (!content.contains(importBloc)) {
+    content = '$importBloc\n$content';
   }
-  if (!routerContent.contains(importView)) {
-    routerContent = '$importView\n$routerContent';
+  if (!content.contains(importView)) {
+    content = '$importView\n$content';
   }
 
-  // Thêm case route
-  final switchCase = '''
+  final caseCode = '''
       case ${capModule}View.router:
         return CupertinoPageRoute(
           settings: settings,
@@ -190,101 +188,96 @@ class AppRouter {
         );
 ''';
 
-  if (!routerContent.contains(switchCase.trim())) {
-    final switchIndex = routerContent.indexOf('switch (settings.name)');
-    if (switchIndex != -1) {
-      final braceIndex = routerContent.indexOf('{', switchIndex);
-      if (braceIndex != -1) {
-        final insertPos = braceIndex + 1;
-        routerContent = '${routerContent.substring(0, insertPos)}\n$switchCase${routerContent.substring(insertPos)}';
+  if (!content.contains('${capModule}View.router')) {
+    final switchPos = content.indexOf('switch (settings.name)');
+    if (switchPos != -1) {
+      final openBrace = content.indexOf('{', switchPos);
+      if (openBrace != -1) {
+        final insertPos = openBrace + 1;
+        content = '${content.substring(0, insertPos)}\n$caseCode${content.substring(insertPos)}';
       }
     }
   }
 
-  routerFile.writeAsStringSync(routerContent);
+  await routerFile.writeAsString(content.trimRight() + '\n');
   print('Đã cập nhật router: $pathRouter');
+}
 
-  // ====================== 3. Cập nhật DI ======================
+Future<void> _updateDIFunction(String pathDI, String packageImport, String capModule, String moduleName) async {
   final diFile = File(pathDI);
-  String diContent = '';
+  String content = '';
 
   if (!diFile.existsSync() || (await diFile.length()) == 0) {
-    diContent = '''import 'package:get_it/get_it.dart';
+    content = '''
+import 'package:get_it/get_it.dart';
 
 final getIt = GetIt.instance;
 
 void setupDependencies() {
 }
 ''';
-    diFile.parent.createSync(recursive: true);
   } else {
-    diContent = diFile.readAsStringSync();
+    content = await diFile.readAsString();
   }
 
+  // Thêm import nếu chưa có
   final importLine = "import '$packageImport/view/$moduleName/${moduleName}_x_controller.dart';";
-  if (!diContent.contains(importLine)) {
-    final getItImport = "import 'package:get_it/get_it.dart';";
-    final pos = diContent.indexOf(getItImport);
-    if (pos != -1) {
-      final insertPos = diContent.indexOf('\n', pos) + 1;
-      diContent = diContent.substring(0, insertPos) + importLine + '\n' + diContent.substring(insertPos);
+  if (!content.contains(importLine) && !content.contains('${moduleName}_x_controller.dart')) {
+    final getItImportPos = content.indexOf("import 'package:get_it/get_it.dart';");
+    if (getItImportPos != -1) {
+      final endOfLine = content.indexOf('\n', getItImportPos);
+      if (endOfLine != -1) {
+        content = content.substring(0, endOfLine + 1) + importLine + '\n' + content.substring(endOfLine + 1);
+      }
     } else {
-      diContent = importLine + '\n' + diContent;
+      content = '$importLine\n$content';
     }
   }
 
-  // 2. Dòng register cần thêm
+  // Thêm register nếu chưa có
   final registerLine = '  getIt.registerLazySingleton<${capModule}XController>(() => ${capModule}XController());';
 
-  if (diContent.contains('<${capModule}XController>')) {
+  if (content.contains('<${capModule}XController>')) {
     print('DI đã có ${capModule}XController, bỏ qua.');
   } else {
-    final setupRegex = RegExp(r'void\s+setupDependencies\(\)\s*\{');
-    final match = setupRegex.firstMatch(diContent);
+    final funcRegex = RegExp(r'void\s+setupDependencies\s*\(\s*\)\s*\{');
+    final match = funcRegex.firstMatch(content);
 
     if (match != null) {
-      final braceOpenPos = diContent.indexOf('{', match.start);
-      final braceClosePos = diContent.lastIndexOf('}');
-      final inside = diContent.substring(braceOpenPos + 1, braceClosePos);
+      final startBrace = content.indexOf('{', match.end - 1);
+      final endBrace = content.lastIndexOf('}');
 
-      if (inside.trim().isEmpty) {
-        // Hàm rỗng → thêm dòng đầu tiên
-        final newInside = '\n$registerLine\n';
-        diContent = diContent.substring(0, braceOpenPos + 1) + newInside + diContent.substring(braceClosePos);
-      } else {
-        // Có nội dung → tìm dòng cuối cùng có register, thêm ngay sau nó (cùng format)
-        final lines = inside.split('\n');
-        var lastRegisterLineIndex = -1;
+      if (startBrace != -1 && endBrace != -1 && endBrace > startBrace) {
+        final body = content.substring(startBrace + 1, endBrace).trim();
 
-        for (var i = lines.length - 1; i >= 0; i--) {
-          if (lines[i].trim().startsWith('getIt.registerLazySingleton')) {
-            lastRegisterLineIndex = i;
-            break;
-          }
-        }
-
-        if (lastRegisterLineIndex != -1) {
-          lines.insert(lastRegisterLineIndex + 1, registerLine);
+        String newBody;
+        if (body.isEmpty) {
+          newBody = '\n$registerLine';
         } else {
-          lines.insert(0, registerLine);
+          // Thêm vào cuối, trước dấu }
+          newBody = '$body\n$registerLine\n';
         }
 
-        final newInside = lines.join('\n');
-        diContent = '${diContent.substring(0, braceOpenPos + 1)}\n$newInside${diContent.substring(braceClosePos)}';
+        content = content.substring(0, startBrace + 1) + newBody + content.substring(endBrace);
       }
     }
   }
 
-  diContent = '${diContent.split('\n').map((line) {
-    return line.trimRight();
-  }).join('\n').trim()}\n';
+  // Lưu lại, đảm bảo không có dòng trắng thừa ở cuối mỗi dòng
+  final cleaned = content
+      .split('\n')
+      .map((line) => line.trimRight())
+      .where((line) => line.isNotEmpty || line.trim().isEmpty) // giữ dòng trắng có ý nghĩa
+      .join('\n')
+      .trimRight();
 
-  diFile.writeAsStringSync(diContent);
-  print('Đã cập nhật DI: $pathDI → ${capModule}XController được thêm đúng chuẩn!');
+  await diFile.writeAsString(cleaned + '\n');
+  print('Đã cập nhật DI: $pathDI → ${capModule}XController được thêm');
 }
 
-File _createFile(String path, String content) {
-  final file = File(path);
-  file.writeAsStringSync('${content.trim()}\n');
-  return file;
+class _FileData {
+  final String path;
+  final String content;
+
+  _FileData({required this.path, required this.content});
 }

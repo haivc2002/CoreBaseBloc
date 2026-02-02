@@ -1,28 +1,26 @@
-import 'package:core_base_bloc/core_base_bloc.dart';
+part of 'core_config_bloc.dart';
 
-class CoreBaseConfigState {
+class CoreConfigState {
 
-  static ConfigTextStyle configTextStyle = ConfigTextStyle();
+  static Map<String, ThemeData> configTheme = const {};
 
   final String keyTheme;
   final Locale locale;
-  final Map<String, Map<String, Color>>? configTheme;
 
-  CoreBaseConfigState({
+  CoreConfigState({
     this.keyTheme = "",
-    this.configTheme,
     this.locale = const Locale('vi'),
   });
 
-  CoreBaseConfigState copyWith({
+  CoreConfigState copyWith({
     String? keyTheme,
-    Map<String, Map<String, Color>>? configTheme,
     Locale? locale,
-  }) => CoreBaseConfigState(
-    keyTheme: keyTheme ?? this.keyTheme,
-    configTheme: configTheme ?? this.configTheme,
-    locale: locale ?? this.locale,
-  );
+  }) {
+    return CoreConfigState(
+      keyTheme: keyTheme ?? this.keyTheme,
+      locale: locale ?? this.locale,
+    );
+  }
 }
 
 class ConfigTextStyle {

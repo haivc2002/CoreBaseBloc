@@ -42,7 +42,7 @@ class _WidgetWaitState extends State<WidgetWait> with SingleTickerProviderStateM
       child: CustomPaint(
         size: Size(widget.size ?? 25, widget.size ?? 25),
         painter: CircularSegmentPainter(
-            color: widget.color ?? Colors.black,
+            color: widget.color ?? Theme.of(context).progressIndicatorTheme.color ?? Colors.yellow,
             strokeWidth: widget.strokeWidth ?? 3
         ),
       ),

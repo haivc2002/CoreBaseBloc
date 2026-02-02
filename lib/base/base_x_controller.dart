@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:core_base_bloc/base/base_view_state.dart';
 import 'package:core_base_bloc/core_base_bloc.dart';
-import 'package:core_base_bloc/core_config/core_base_config_cubit.dart';
+import 'package:core_base_bloc/core_config/core_config_bloc.dart';
 
 /// A base controller providing shared utilities and behaviors for all feature controllers.
 ///
@@ -35,6 +35,7 @@ abstract class BaseXController<B extends Bloc> with BaseContext<B>,
   void onInit() {
     _isLoadMore = false;
     isMoreEnable = true;
+    withScrollController = false;
     if (withScrollController) {
       scrollController = ScrollController();
       scrollController.addListener(_scrollListener);
@@ -111,11 +112,11 @@ abstract class BaseXController<B extends Bloc> with BaseContext<B>,
   void setViewOk() => setScreenState = screenStateOk;
 
   void onChangeTheme(String theme) {
-    context.read<CoreBaseConfigCubit>().setThemeUI(theme);
+    context.read<CoreConfigBloc>().add(CoreConfigThemeEvent(theme));
   }
 
   void onChangeLanguage(Locale local) {
-    context.read<CoreBaseConfigCubit>().setLanguage(local);
+    context.read<CoreConfigBloc>().add(CoreConfigLanguageEvent(local));
   }
 
   /// Ex: @override

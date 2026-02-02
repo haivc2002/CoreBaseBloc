@@ -1,6 +1,5 @@
 import 'package:core_base_bloc/core_base_bloc.dart';
-import 'package:core_base_bloc/core_config/core_base_app.dart';
-import 'package:core_base_bloc/core_config/core_base_config_cubit.dart';
+import 'package:core_base_bloc/core_config/core_app.dart';
 import 'package:core_base_bloc/overlay_ui/overlay_snackbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get_it/get_it.dart';
@@ -21,6 +20,8 @@ mixin BaseContext<B extends Bloc> {
   EdgeInsets get paddingView => MediaQuery.of(context).padding;
 
   Brightness get platformBrightness => MediaQuery.of(context).platformBrightness;
+
+  ThemeData get theme => Theme.of(context);
 
   /// ex: emitEvent(ExampleEvent());
   void emitEvent(event) {
@@ -82,36 +83,13 @@ mixin BaseContext<B extends Bloc> {
   /// [Overlay]
   /// ----------------------------------------------------
 
-  /// Use the function with the color key as the Map type (color decoding).
-  /// Map<String, Map<String, Color>>
-  /// EXU: deColor("RED") --> red color (color type)
-  Color deColor(String key) {
-    final context = contextKV[type.toString()] ?? navigatorKey.currentContext!;
-    final theme = context.read<CoreBaseConfigCubit>().state.configTheme;
-    if (theme == null) throw Exception("ConfigTheme not configure");
-    final keyTheme = context.read<CoreBaseConfigCubit>().state.keyTheme;
-    if (theme.containsKey(keyTheme)) {
-      final data = theme[keyTheme]!;
-      if (data.containsKey(key)) return data[key]!;
-    }
-    /// fallback về theme đầu tiên
-    final first = theme.entries.first.value;
-    if (first.containsKey(key)) return first[key]!;
-    throw Exception("Color key '$key' not found");
-  }
-
   TextStyle get textStyle => (){
-    ConfigTextStyle t = CoreBaseConfigState.configTextStyle;
-    Color resolveColor(Object value) {
-      return value is String
-          ? deColor(value)
-          : value as Color;
-    }
+    final style = theme.textTheme.labelMedium;
     return TextStyle(
-      fontSize: t.fontSize ?? 13,
-      color: resolveColor(t.color!.valueColor),
-      fontWeight: t.fontWeight ?? FontWeight.w400,
-      fontFamily: t.fontFamily,
+      fontSize: style?.fontSize,
+      color: style?.color,
+      fontWeight: style?.fontWeight ?? FontWeight.w400,
+      fontFamily: style?.fontFamily,
     );
   }();
 
@@ -149,52 +127,4 @@ void closeLoading() => back();
 T getCtrl<T extends BaseXController>() {
   final controller = GetIt.I<T>();
   return controller;
-}
-
-TextStyle textStyleWithCtx(BuildContext context) {
-  ConfigTextStyle t = CoreBaseConfigState.configTextStyle;
-  Color resolveColor(Object value) {
-    return value is String
-        ? deColorWithCtx(context, value)
-        : value as Color;
-  }
-
-  return TextStyle(
-    fontSize: t.fontSize ?? 13,
-    color: resolveColor(t.color!.valueColor),
-    fontWeight: t.fontWeight ?? FontWeight.w400,
-    fontFamily: t.fontFamily,
-  );
-}
-
-Color deColorWithCtx(BuildContext context, String key) {
-  final theme = context.read<CoreBaseConfigCubit>().state.configTheme;
-  if (theme == null) throw Exception("ConfigTheme not configure");
-  final keyTheme = context.read<CoreBaseConfigCubit>().state.keyTheme;
-  if (theme.containsKey(keyTheme)) {
-    final data = theme[keyTheme]!;
-    if (data.containsKey(key)) return data[key]!;
-  }
-  /// fallback về theme đầu tiên
-  final first = theme.entries.first.value;
-  if (first.containsKey(key)) return first[key]!;
-  throw Exception("Color key '$key' not found");
-}
-
-/// Use with defined color codes (which are constant and always use the first mode of the color).
-/// [dFColor] stands for default color
-/// Map<String, Map<String, Color>>
-/// "LIGHT": {
-///   "RED": Colors.red ---> Always use [dFColor] the first value, which is [LIGHT].
-/// },
-/// "DARK": {
-///   "RED": Colors.green
-/// }
-/// EXU: dFColor("RED") --> red color (color type),
-Color dFColor(String key) {
-  final theme = navigatorKey.currentContext?.read<CoreBaseConfigCubit>().state.configTheme;
-  if (theme == null) throw Exception("ConfigTheme not configure");
-  final first = theme.entries.first.value;
-  if (first.containsKey(key)) return first[key]!;
-  throw Exception("Color key '$key' not found in first theme");
 }

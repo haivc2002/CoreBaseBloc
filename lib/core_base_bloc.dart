@@ -2,7 +2,7 @@ library;
 
 export 'package:flutter/material.dart';
 export 'package:core_base_bloc/widget/widget_button.dart';
-export 'package:core_base_bloc/core_config/core_base_config_state.dart';
+export 'package:core_base_bloc/core_config/core_config_bloc.dart';
 export 'package:core_base_bloc/common/core_style.dart';
 export 'package:core_base_bloc/widget/widget_icon.dart';
 export 'package:core_base_bloc/widget/widget_checkbox.dart';

@@ -1,8 +1,6 @@
 import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:core_base_bloc/core_base_bloc.dart';
-import 'package:core_base_bloc/core_config/core_base_config_cubit.dart';
 
 class WidgetImage extends StatelessWidget {
   final String? image;

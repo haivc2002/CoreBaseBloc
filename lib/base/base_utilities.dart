@@ -45,7 +45,7 @@ class ECWidget extends StatelessWidget {
         const SizedBox(height: 12),
         Text(
           _getDefaultMessage,
-          style: textStyleWithCtx(context).medium,
+          style: Theme.of(context).textTheme.labelMedium,
           textAlign: TextAlign.center,
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
@@ -77,7 +77,7 @@ class ECWidget extends StatelessWidget {
     }
     return Builder(
       builder: (context) {
-        return Icon(iconData, size: 60, color: textStyleWithCtx(context).color);
+        return Icon(iconData, size: 60, color: Theme.of(context).iconTheme.color);
       }
     );
   }
@@ -96,7 +96,7 @@ class ECWidget extends StatelessWidget {
           children: [
             Text(
               _getDefaultMessage,
-              style: textStyleWithCtx(context).sColor(Colors.black54).medium,
+              style: Theme.of(context).textTheme.labelMedium,
               textAlign: TextAlign.center,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
@@ -127,7 +127,7 @@ class ECWidget extends StatelessWidget {
         width: 120,
         child: WidgetButton(
           title: "Thử lại",
-          contentStyle: textStyleWithCtx(context).sColor(Colors.white).medium,
+          contentStyle: Theme.of(context).textTheme.labelMedium?.sColor(Colors.white),
           onTap: onTap,
         ),
       ),

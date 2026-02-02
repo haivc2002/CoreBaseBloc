@@ -1,10 +1,9 @@
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:core_base_bloc/base/base_utilities.dart';
 import 'package:core_base_bloc/base/base_view_state.dart';
 import 'package:core_base_bloc/core_base_bloc.dart';
-import 'package:core_base_bloc/core_config/core_base_app.dart';
+import 'package:core_base_bloc/core_config/core_app.dart';
 import 'package:get_it/get_it.dart';
 
 abstract class BaseView<T extends BaseXController, B extends Bloc<dynamic, S>, S>

@@ -43,7 +43,7 @@ class OverlayDialog extends StatelessWidget {
                   child: Padding(
                     padding: dialogTitle.padding,
                     child: dialogTitle.title is String
-                        ? Text(dialogTitle.title as String, style: textStyleWithCtx(context).bold.sSize(15).sColor(Colors.black), maxLines: 1)
+                        ? Text(dialogTitle.title as String, style: Theme.of(context).textTheme.labelMedium?.bold.sSize(15).sColor(Colors.black), maxLines: 1)
                         : dialogTitle.title as Widget,
                   ),
                 ),
@@ -117,7 +117,7 @@ class OverlayDialogBottom {
             width: 100,
             child: WidgetButton(
               title: "Đóng",
-              contentStyle: textStyleWithCtx(context).sColor(Colors.white).bold,
+              contentStyle: Theme.of(context).textTheme.labelMedium?.sColor(Colors.white).bold,
               onTap: back,
               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 7),
             ),

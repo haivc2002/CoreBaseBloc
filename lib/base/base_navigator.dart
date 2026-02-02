@@ -1,5 +1,5 @@
 import 'package:core_base_bloc/core_base_bloc.dart';
-import 'package:core_base_bloc/core_config/core_base_app.dart';
+import 'package:core_base_bloc/core_config/core_app.dart';
 
 final _contextNavigator = navigatorKey.currentContext!;
 
