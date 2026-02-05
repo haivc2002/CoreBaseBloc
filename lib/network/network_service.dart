@@ -2,21 +2,32 @@ import 'dart:async';
 import 'dart:developer' as dev;
 
 import 'package:core_base_bloc/common/global.dart';
+import 'package:core_base_bloc/network/network_auth_config.dart';
 import 'package:core_base_bloc/network/network_auth_interceptor.dart';
 import 'package:dio/dio.dart';
 
 import 'network_dev_logger.dart';
 import 'network_exception.dart';
 
-String TOKEN_STRING = "TOKEN_STRING";
-String REFRESH_TOKEN_STRING = "REFRESH_TOKEN_STRING";
+// // Deprecated: Use AuthConfig.tokenStorageKey instead
+// @Deprecated('Use AuthConfig.tokenStorageKey instead. Will be removed in future versions.')
+// String TOKEN_STRING = kDefaultTokenStorageKey;
+//
+// // Deprecated: Use AuthConfig.refreshTokenStorageKey instead
+// @Deprecated('Use AuthConfig.refreshTokenStorageKey instead. Will be removed in future versions.')
+// String REFRESH_TOKEN_STRING = kDefaultRefreshTokenStorageKey;
 
 class NetworkService {
   final Dio _dio;
   final String baseUrl;
-  NetworkService({required this.baseUrl}) : _dio = Dio(BaseOptions(baseUrl: baseUrl)) {
+  final NetworkAuthConfig authConfig;
+
+  NetworkService({
+    required this.baseUrl,
+    required this.authConfig,
+  }) : _dio = Dio(BaseOptions(baseUrl: baseUrl)) {
     _dio.interceptors.add(DevLogger());
-    _dio.interceptors.add(NetworkAuthInterceptor(_dio));
+    _dio.interceptors.add(NetworkAuthInterceptor(_dio, authConfig));
     _dio.options.validateStatus = (status) => true;
   }
 
@@ -31,7 +42,7 @@ class NetworkService {
     required T Function(dynamic) fromJson,
   }) async {
     try {
-      final String token = storageRead<String>(TOKEN_STRING) ?? '';
+      final String token = storageRead<String>(authConfig.tokenStorageKey) ?? '';
       if(withToken) dev.log(token, name: "WITH TOKEN");
 
       final response = await _dio.request(

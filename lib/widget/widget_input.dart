@@ -14,7 +14,7 @@ class WidgetInput extends StatelessWidget {
     this.hintTextAnimation = true,
     this.autoSelectAll = false,
     this.contentPadding, this.onSubmitted,
-    this.fillColor = Colors.white, this.radius = 10, this.enabledBorderColor = Colors.transparent,
+    this.fillColor, this.radius = 10, this.enabledBorderColor = Colors.transparent,
     this.alertColor = Colors.red,
     this.focusedBorderColor = Colors.grey, this.textStyle, this.cursorColor = Colors.blue
   }) : assert(
@@ -38,16 +38,15 @@ class WidgetInput extends StatelessWidget {
   final bool hintTextAnimation, autoSelectAll;
   final EdgeInsetsGeometry? contentPadding;
   final Function(String)? onSubmitted;
-  final double radius;
-  final Color fillColor,
+  final double? radius;
+  final Color? fillColor,
       enabledBorderColor,
       focusedBorderColor,
-      alertColor,
       cursorColor;
+  final Color alertColor;
 
   @override
   Widget build(BuildContext context) {
-    final style = Theme.of(context).textTheme.labelMedium;
     
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -56,16 +55,16 @@ class WidgetInput extends StatelessWidget {
         Row(children: [
           if(title != null && (title??'').isNotEmpty) Padding(
             padding: const EdgeInsets.symmetric(vertical: 5),
-            child: Text(title??'', style: style),
+            child: Text(title??'', style: TextStyle()),
           ),
           const SizedBox(width: 5),
-          if(tick!) Text("*", style: style?.sColor(Colors.red).sSize(18))
+          if(tick!) Text("*", style: TextStyle().sColor(Colors.red).sSize(18))
         ]),
         TextField(
           textAlign: textAlign,
           cursorColor: cursorColor,
           enabled: enabled,
-          style: textStyle ?? style?.sColor(Colors.black),
+          style: textStyle ?? TextStyle(),
           inputFormatters: inputFormatters,
           focusNode: focusNode,
           keyboardType: keyboardType ?? TextInputType.text,
@@ -97,10 +96,10 @@ class WidgetInput extends StatelessWidget {
                 ),
               ),
             ) : null,
-            hintStyle: hintStyle ?? style?.sColor(Colors.grey).regular,
+            // hintStyle: hintStyle ?? TextStyle().sColor(Colors.grey).regular,
             hintText: !hintTextAnimation ? hintText ?? '' : null,
             label: hintTextAnimation ? Text(hintText ?? "",
-                style: hintStyle ?? style?.sColor((validateValue??'').isNotEmpty
+                style: hintStyle ?? TextStyle().sColor((validateValue??'').isNotEmpty
                     ? alertColor
                     : hintStyle?.color ?? Colors.grey
                 ).regular
@@ -115,15 +114,22 @@ class WidgetInput extends StatelessWidget {
               minHeight: 0,
             ),
             enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: (validateValue??'').isNotEmpty
-                    ? alertColor
-                    : enabledBorderColor
-                ),
-                borderRadius: BorderRadius.circular(radius)
+              borderSide: (validateValue??'').isNotEmpty
+                ? BorderSide(color: alertColor)
+                : Theme.of(context).inputDecorationTheme.enabledBorder!.borderSide,
+              borderRadius: radius != null
+                  ? BorderRadius.circular(radius!)
+                  : (Theme.of(context).inputDecorationTheme.enabledBorder
+              as OutlineInputBorder).borderRadius,
             ),
             focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: (validateValue??'').isNotEmpty ? alertColor : focusedBorderColor),
-                borderRadius: BorderRadius.circular(radius)
+              borderSide: (validateValue??'').isNotEmpty
+                ? BorderSide(color: alertColor)
+                : Theme.of(context).inputDecorationTheme.focusedBorder!.borderSide,
+              borderRadius: radius != null
+                  ? BorderRadius.circular(radius!)
+                  : (Theme.of(context).inputDecorationTheme.focusedBorder
+              as OutlineInputBorder).borderRadius,
             ),
           ),
         ),
@@ -132,7 +138,7 @@ class WidgetInput extends StatelessWidget {
           curve: Curves.ease,
           child: (validateValue != null && (validateValue ?? '').isNotEmpty) ? Text(
             validateValue!,
-            style: style?.sColor(Colors.red).medium.sSize(12),
+            style: TextStyle().sColor(Colors.red).medium.sSize(12),
           ) : const SizedBox.shrink(),
         ),
       ],

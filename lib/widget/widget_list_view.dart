@@ -40,7 +40,7 @@ class WidgetListView extends StatelessWidget {
     Key? key,
     ScrollController? controller,
     ScrollPhysics? physics,
-    Color onRefreshColor = Colors.grey,
+    Color? onRefreshColor,
     required List<Widget> children,
     Future<void> Function()? onRefresh,
     WidgetListViewType listViewType = WidgetListViewType.auto,
@@ -64,7 +64,7 @@ class WidgetListView extends StatelessWidget {
     ScrollPhysics? physics,
     required IndexedWidgetBuilder itemBuilder,
     required int itemCount,
-    Color onRefreshColor = Colors.orange,
+    Color? onRefreshColor,
     EdgeInsetsGeometry? padding,
     WidgetListViewType listViewType = WidgetListViewType.auto,
     Future<void> Function()? onRefresh
@@ -86,6 +86,7 @@ class WidgetListView extends StatelessWidget {
   Widget build(BuildContext context) {
     final ScrollPhysics effectivePhysics = physics ?? const BouncingScrollPhysics().applyTo(const AlwaysScrollableScrollPhysics());
     final EdgeInsetsGeometry defPadding = padding ?? const EdgeInsets.symmetric(horizontal: 20, vertical: 20);
+    final colorRefresh = onRefreshColor ?? Theme.of(context).colorScheme.primary;
 
     return CustomRefreshIndicator(
       onRefresh: onRefresh ?? () async {},
@@ -112,7 +113,7 @@ class WidgetListView extends StatelessWidget {
                   scale: controller.value.clamp(0.8, 1.0),
                   child: Center(child: Offstage(
                     offstage: onRefresh == null,
-                    child: _progress
+                    child: _progress(colorRefresh)
                   ))
                 ),
               ),
@@ -145,27 +146,27 @@ class WidgetListView extends StatelessWidget {
 
   }
 
-  Widget get _progress {
+  Widget _progress(Color colorRefresh) {
     if(listViewType == WidgetListViewType.android) {
       return RefreshProgressIndicator(
         backgroundColor: Colors.white,
-        color: onRefreshColor,
+        color: colorRefresh,
       );
     } else if(listViewType == WidgetListViewType.ios) {
       return CupertinoActivityIndicator(
-        color: onRefreshColor,
+        color: colorRefresh,
         radius: 14,
       );
     } else {
       if(Platform.isIOS) {
         return CupertinoActivityIndicator(
-          color: onRefreshColor,
+          color: colorRefresh,
           radius: 14,
         );
       } else {
         return RefreshProgressIndicator(
           backgroundColor: Colors.white,
-          color: onRefreshColor,
+          color: colorRefresh,
         );
       }
     }

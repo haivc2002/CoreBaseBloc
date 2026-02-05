@@ -70,35 +70,30 @@ abstract class BaseXController<B extends Bloc> with BaseContext<B>,
     args = arguments;
   }
 
-  /// Account operations ----------------------------------------------------------
 
-  static String reTokenAPI = "";
-  static String nameTokenInRes = "";
-  static String nameReTokenInRes = "";
-  static BodyRequestRefreshToken bodyRequest = BodyRequestRefreshToken();
-  static VoidCallback onError = (){};
+  /// Get access token from storage using custom key.
+  /// Prefer this over deprecated [getToken] for flexibility.
+  String getTokenBy(String storageKey) => storageRead(storageKey) ?? '';
 
-  void setUpAuthentication({
-    required String reTokenAPI,
-    required BodyRequestRefreshToken bodyRequest,
-    required String nameTokenInResponse,
-    required String nameReTokenInResponse,
-    required VoidCallback onError
-  }) {
-    BaseXController.reTokenAPI = reTokenAPI;
-    BaseXController.bodyRequest = bodyRequest;
-    BaseXController.nameTokenInRes = nameTokenInResponse;
-    BaseXController.nameReTokenInRes = nameReTokenInResponse;
-    BaseXController.onError = onError;
-  }
+  /// Get refresh token from storage using custom key.
+  /// Prefer this over deprecated [getReToken] for flexibility.
+  String? getRefreshTokenBy(String storageKey) => storageRead<String>(storageKey);
 
-  String get getToken => storageRead(TOKEN_STRING);
+  /// **DEPRECATED**: Use [getTokenBy] with custom storage key instead.
+  @Deprecated('Use getTokenBy(storageKey) instead. Will be removed in future versions.')
+  String get getToken => storageRead(kDefaultTokenStorageKey) ?? '';
 
-  String? get getReToken => storageRead<String>(REFRESH_TOKEN_STRING);
+  /// **DEPRECATED**: Use [getRefreshTokenBy] with custom storage key instead.
+  @Deprecated('Use getRefreshTokenBy(storageKey) instead. Will be removed in future versions.')
+  String? get getReToken => storageRead<String>(kDefaultRefreshTokenStorageKey);
 
+  /// Clear authentication data from storage.
+  /// 
+  /// By default, this clears the deprecated TOKEN_STRING and REFRESH_TOKEN_STRING.
+  /// If you use custom storage keys, call [storageClear] or [storageRemove] directly.
   void onClearDataAuth() {
-    storageRemove(TOKEN_STRING);
-    storageRemove(REFRESH_TOKEN_STRING);
+    storageRemove(kDefaultTokenStorageKey);
+    storageRemove(kDefaultRefreshTokenStorageKey);
   }
 
   /// Account operations ----------------------------------------------------------

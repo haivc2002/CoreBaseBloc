@@ -21,17 +21,21 @@ class WidgetIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final List<Color> resultColor = colors.isEmpty
+        ? [?Theme.of(context).iconTheme.color]
+        : colors;
+
     Widget child;
 
     if (icon is IconData) {
-      child = Icon(icon as IconData, size: size, color: colors.isEmpty ? null : colors.first);
+      child = Icon(icon as IconData, size: size, color: resultColor.first);
     } else if (icon is String && (icon as String).endsWith('.svg')) {
       child = SvgPicture.asset(
         icon as String,
         width: size,
         height: size,
-        colorFilter: colors.length == 1
-            ? ColorFilter.mode(colors.first, BlendMode.srcIn)
+        colorFilter: resultColor.length == 1
+            ? ColorFilter.mode(resultColor.first, BlendMode.srcIn)
             : null,
       );
     } else if (icon is String) {
@@ -39,18 +43,18 @@ class WidgetIcon extends StatelessWidget {
         icon as String,
         width: size,
         height: size,
-        color: colors.length == 1 ? colors.first : null,
-        colorBlendMode: colors.length == 1 ? BlendMode.srcIn : null,
+        color: resultColor.length == 1 ? resultColor.first : null,
+        colorBlendMode: resultColor.length == 1 ? BlendMode.srcIn : null,
       );
     } else {
       return const SizedBox.shrink();
     }
 
     // Nếu có 2 màu -> bọc ShaderMask
-    if (colors.length == 2) {
+    if (resultColor.length == 2) {
       return ShaderMask(
         shaderCallback: (bounds) => LinearGradient(
-          colors: colors,
+          colors: resultColor,
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ).createShader(bounds),

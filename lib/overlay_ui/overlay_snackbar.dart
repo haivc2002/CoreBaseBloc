@@ -7,9 +7,8 @@ enum StatusSnackBar {
   SUCCESS
 }
 
-void snackBar({
+void _overlaySnackBar(String message, {
   required StatusSnackBar status,
-  required String message,
   String? title
 }) {
   Color color = Colors.green;
@@ -65,3 +64,21 @@ void snackBar({
     ),
   );
 }
+
+void successSnackBar({String? message, String? title}) => _overlaySnackBar(
+  message ?? "",
+  status: StatusSnackBar.SUCCESS,
+  title: title,
+);
+
+void errorSnackBar({String? message, String? title}) => _overlaySnackBar(
+  message ?? "",
+  status: StatusSnackBar.FAILURE,
+  title: title,
+);
+
+void warningSnackBar({String? message, String? title}) => _overlaySnackBar(
+  message ?? "",
+  status: StatusSnackBar.WARNING,
+  title: title,
+);
